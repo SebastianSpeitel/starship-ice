@@ -6,8 +6,6 @@ from rich.console import Console
 from datetime import datetime
 from . import Status, Trip, get_status, get_trip, next_stop
 
-DEFAULT_FORMAT = "[green]{trainType} {vzn}[/green] @ [red]{speed} km/h[/red] (next: [yellow]{next[station][name]}[/yellow] at {next[timetable][actualArrivalTime]:%H:%M})"
-
 cons = Console(color_system='standard')
 
 
@@ -18,8 +16,8 @@ def make_prompt(status: Status, trip: Trip) -> Iterable[str]:
     if vzn := trip.get('vzn'):
         yield f"[green]{vzn}[/green]"
 
-    if speed := status.get('speed'):
-        yield f"[red]{speed} km/h[/red]"
+    if (speed := status.get('speed')) is not None:
+        yield f"[red]{speed:.1f} km/h[/red]"
 
     if stops := trip.get('stops'):
         next = next_stop(stops)
@@ -59,7 +57,7 @@ def main():
 
     # data['next.name'] = next['station']['name']
     # data['next.arrival'] = next_arrival
-    cons.print(' '.join(make_prompt(status, trip)))
+    cons.print(*make_prompt(status, trip))
 
 
 if __name__ == "__main__":
