@@ -1,6 +1,15 @@
 
 from typing import Iterable, TypedDict
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
+
+timeout = 0.1
+retry_strategy = Retry(total=1)
+adapter = HTTPAdapter(max_retries=retry_strategy)
+api = requests.Session()
+api.mount("https://", adapter)
+api.mount("http://", adapter)
 
 
 class Status(TypedDict):
@@ -44,7 +53,7 @@ def get_status() -> Status:
         }
     """
 
-    resp = requests.get("https://iceportal.de/api1/rs/status")
+    resp = api.get("https://iceportal.de/api1/rs/status", timeout=timeout)
 
     return resp.json()
 
@@ -293,7 +302,7 @@ def get_trip() -> Trip:
     }
     """
 
-    resp = requests.get("https://iceportal.de/api1/rs/tripInfo/trip")
+    resp = api.get("https://iceportal.de/api1/rs/tripInfo/trip", timeout=timeout)
 
     return resp.json().get('trip')
 
